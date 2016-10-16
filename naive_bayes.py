@@ -115,13 +115,10 @@ class naivebayes(classifier):
         return best
 
 
-def train_snake_language(cl):
-    cl.train('Pythons are constrictors that feed on birds and mammals', 'Snake')
-    cl.train('Python was originally developed as a scripting language', 'Language')
-    cl.train('A 49-ft.-long python was found in Indonesia', 'Snake')
-    cl.train('Python has a dynamic type system', 'Language')
-    cl.train('Python with vivid scales', 'Snake')
-    cl.train('Open source project', 'Language')
+def train_snake_language(cl, trainDict):
+    for classLabel, sentencesList in trainDict.iteritems():
+        for sentence in sentencesList:
+            cl.train(sentence, classLabel)
 
 
 def print_classify(cl, text):
@@ -160,10 +157,7 @@ if __name__ == '__main__':
     with open(inputFileName, 'r') as datasetFile:
         trainDict = parse_input(datasetFile)
 
-    for key, value in trainDict.iteritems():
-        print "class: " + key + " sentence: " + str(value)
-
     cl = naivebayes(getwords)
-    train_snake_language(cl)
+    train_snake_language(cl, trainDict)
     print_classify(cl, "dynamic programming")
     print_classify(cl, "boa constrictors")
