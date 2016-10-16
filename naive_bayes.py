@@ -115,19 +115,17 @@ class naivebayes(classifier):
         return best
 
 
-def train_snake_language(cl, trainDict):
+def train(cl, trainDict):
     for classLabel, sentencesList in trainDict.iteritems():
         for sentence in sentencesList:
             cl.train(sentence, classLabel)
 
 
 def print_classify(cl, text):
-    class1 = "Language"
-    class2 = "Snake"
+    categories = cl.categories()
     print text + " -> " + cl.classify(text, default="unknown")
-    print class1 + " with probability " + str(cl.prob(text, class1))
-    print class2 + " with probability " + str(cl.prob(text, class2))
-    print
+    for category in categories:
+        print category + " with probability " + str(cl.prob(text, category))
 
 
 def get_input_file_name():
@@ -140,24 +138,27 @@ def get_input_file_name():
 
 
 def parse_input(file):
-    classSentenceDict = {}
+    categorySentenceDict = {}
     for line in file:
         splitLine = line.split()
-        classLabel = splitLine[0]
+        category = splitLine[0]
         sentence = " ".join(splitLine)
-        if classLabel in classSentenceDict:
-            classSentenceDict[classLabel].append(sentence)
+        if category in categorySentenceDict:
+            categorySentenceDict[category].append(sentence)
         else:
-            classSentenceDict[classLabel] = [sentence]
-    return classSentenceDict
+            categorySentenceDict[category] = [sentence]
+    return categorySentenceDict
 
 
-if __name__ == '__main__':
+def get_dict_from_input_file():
     inputFileName = get_input_file_name()
     with open(inputFileName, 'r') as datasetFile:
         trainDict = parse_input(datasetFile)
+    return trainDict
 
+
+if __name__ == '__main__':
+    trainDict = get_dict_from_input_file()
     cl = naivebayes(getwords)
-    train_snake_language(cl, trainDict)
+    train(cl, trainDict)
     print_classify(cl, "dynamic programming")
-    print_classify(cl, "boa constrictors")
