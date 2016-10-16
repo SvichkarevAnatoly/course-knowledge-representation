@@ -1,3 +1,4 @@
+import codecs
 import re
 
 import sys
@@ -5,7 +6,7 @@ from os.path import splitext
 
 
 def getwords(doc):
-    splitter = re.compile('\\W*')
+    splitter = re.compile(u'\\W*', re.U)
     # Split the words by non-alpha characters
     words = [s.lower() for s in splitter.split(doc) if 2 < len(s) < 20]
 
@@ -14,7 +15,7 @@ def getwords(doc):
 
 
 class classifier:
-    def __init__(self, getfeatures, filename=None):
+    def __init__(self, getfeatures):
         # Counts of feature/category combinations
         self.fc = {}
         # Counts of documents in each category
@@ -124,9 +125,10 @@ def train(cl, trainDict):
 
 def get_classification_response(cl, text):
     categories = cl.categories()
-    response = text + " -> " + cl.classify(text, default="unknown") + "\n"
+    response = text + u" -> " + cl.classify(text, default="unknown") + u"\n"
     for category in categories:
-        response += category + " with probability " + str(cl.prob(text, category)) + "\n"
+        response += category + u" with probability " +\
+                    str(cl.prob(text, category)).decode('utf-8') + u"\n"
     return response
 
 
@@ -144,7 +146,7 @@ def parse_input(file):
     for line in file:
         splitLine = line.split()
         category = splitLine[0]
-        sentence = " ".join(splitLine)
+        sentence = " ".join(splitLine[1:])
         if category in categorySentenceDict:
             categorySentenceDict[category].append(sentence)
         else:
@@ -154,7 +156,7 @@ def parse_input(file):
 
 def get_dict_from_input_file():
     inputFileName = get_input_file_name()
-    with open(inputFileName, 'r') as datasetFile:
+    with codecs.open(inputFileName, 'r', "utf-8") as datasetFile:
         trainDict = parse_input(datasetFile)
     logFileName = splitext(inputFileName)[0] + ".log"
     return trainDict, logFileName
@@ -165,11 +167,11 @@ if __name__ == '__main__':
     cl = naivebayes(getwords)
     train(cl, trainDict)
 
-    with open(logFileName, "w") as logFile:
+    with codecs.open(logFileName, "w", "utf-8") as logFile:
         print "For exit press Enter."
-        query = raw_input("Input query for classification:\n")
-        while query != "":
+        query = raw_input("Input query for classification:\n").decode('utf-8')
+        while query != u"":
             response = get_classification_response(cl, query)
             print response
-            logFile.write(response)
-            query = raw_input("Input query for classification:\n")
+            logFile.write(response + u"\n")
+            query = raw_input("Input query for classification:\n").decode('utf-8')
