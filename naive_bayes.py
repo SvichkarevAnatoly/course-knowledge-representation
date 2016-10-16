@@ -1,6 +1,7 @@
 import re
 
 import sys
+from os.path import splitext
 
 
 def getwords(doc):
@@ -121,12 +122,12 @@ def train(cl, trainDict):
             cl.train(sentence, classLabel)
 
 
-def print_classify(cl, text):
+def get_classification_response(cl, text):
     categories = cl.categories()
-    print text + " -> " + cl.classify(text, default="unknown")
+    response = text + " -> " + cl.classify(text, default="unknown") + "\n"
     for category in categories:
-        print category + " with probability " + str(cl.prob(text, category))
-    print
+        response += category + " with probability " + str(cl.prob(text, category)) + "\n"
+    return response
 
 
 def get_input_file_name():
@@ -155,16 +156,20 @@ def get_dict_from_input_file():
     inputFileName = get_input_file_name()
     with open(inputFileName, 'r') as datasetFile:
         trainDict = parse_input(datasetFile)
-    return trainDict
+    logFileName = splitext(inputFileName)[0] + ".log"
+    return trainDict, logFileName
 
 
 if __name__ == '__main__':
-    trainDict = get_dict_from_input_file()
+    trainDict, logFileName = get_dict_from_input_file()
     cl = naivebayes(getwords)
     train(cl, trainDict)
 
-    print "For exit press Enter."
-    query = raw_input("Input query for classification:\n")
-    while query != "":
-        print_classify(cl, query)
+    with open(logFileName, "w") as logFile:
+        print "For exit press Enter."
         query = raw_input("Input query for classification:\n")
+        while query != "":
+            response = get_classification_response(cl, query)
+            print response
+            logFile.write(response)
+            query = raw_input("Input query for classification:\n")
