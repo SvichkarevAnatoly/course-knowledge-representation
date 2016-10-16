@@ -1,5 +1,7 @@
 import re
 
+import sys
+
 
 def getwords(doc):
     splitter = re.compile('\\W*')
@@ -131,7 +133,36 @@ def print_classify(cl, text):
     print
 
 
+def get_input_file_name():
+    if len(sys.argv) != 2:
+        print "Need one dataset file name:\n" \
+              "Example:\n" \
+              "python naive_bayes.py file.txt"
+        exit(0)
+    return sys.argv[1]
+
+
+def parse_input(file):
+    classSentenceDict = {}
+    for line in file:
+        splitLine = line.split()
+        classLabel = splitLine[0]
+        sentence = " ".join(splitLine)
+        if classLabel in classSentenceDict:
+            classSentenceDict[classLabel].append(sentence)
+        else:
+            classSentenceDict[classLabel] = [sentence]
+    return classSentenceDict
+
+
 if __name__ == '__main__':
+    inputFileName = get_input_file_name()
+    with open(inputFileName, 'r') as datasetFile:
+        trainDict = parse_input(datasetFile)
+
+    for key, value in trainDict.iteritems():
+        print "class: " + key + " sentence: " + str(value)
+
     cl = naivebayes(getwords)
     train_snake_language(cl)
     print_classify(cl, "dynamic programming")
