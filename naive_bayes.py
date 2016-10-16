@@ -126,6 +126,7 @@ def print_classify(cl, text):
     print text + " -> " + cl.classify(text, default="unknown")
     for category in categories:
         print category + " with probability " + str(cl.prob(text, category))
+    print
 
 
 def get_input_file_name():
@@ -161,4 +162,9 @@ if __name__ == '__main__':
     trainDict = get_dict_from_input_file()
     cl = naivebayes(getwords)
     train(cl, trainDict)
-    print_classify(cl, "dynamic programming")
+
+    print "For exit press Enter."
+    query = raw_input("Input query for classification:\n")
+    while query != "":
+        print_classify(cl, query)
+        query = raw_input("Input query for classification:\n")
